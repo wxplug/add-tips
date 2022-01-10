@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'PLUG-ADD-MYAPP-KEY';
+const STORAGE_KEY_ONE = 'ADD-MYAPP-KEY-ONE';
 
 Component({
   /**
@@ -8,12 +8,7 @@ Component({
     // 提示文字
     text: {
       type: String,
-      value: '点击「添加小程序」\n 下次访问更便捷哦！'
-    },
-    // 多少秒后关闭
-    duration: {
-      type: Number,
-      value: 5
+      value: '「添加小程序」访问更便捷!'
     }
   },
 
@@ -22,29 +17,35 @@ Component({
    */
   data: {
     SHOW_TOP: false,
-    SHOW_MODAL: false
+    SHOW_TOP_key: 1,
+    marRight: 66
   },
-
   ready: function () {
-    // 判断是否已经显示过
-    let cache = wx.getStorageSync(STORAGE_KEY);
-    if (cache) return;
-    // 没显示过，则进行展示
-    this.setData({
-      SHOW_TOP: true
-    });
-    // 关闭时间
-    setTimeout(() => {
-      this.setData({
-        SHOW_TOP: false
-      })
-    }, this.data.duration * 1000);
+    this.initTips();
   },
-
   /**
    * 组件的方法列表
    */
   methods: {
+    initTips: function () {
+      // 判断是否已经显示过
+      let cacheOne = wx.getStorageSync(STORAGE_KEY_ONE);
+      const now = +new Date();
+      // 校验缓存数据 以及缓存时间是否过期(关闭后缓存一个月 一个月后重新提示用户)
+      if (cacheOne && (now - cacheOne < 30 * 24 * 3600000)) return;
+      // 处理根据系统信息处理位移箭头位置（重点）
+      let systemInfo = wx.getSystemInfoSync();
+      let client = wx.getMenuButtonBoundingClientRect();
+      if (systemInfo && client) {
+        this.setData({
+          marRight: systemInfo.screenWidth - client.left - 28
+        });
+      }
+      // 没显示过，则进行展示
+      this.setData({
+        SHOW_TOP: true
+      });
+    },
     // 显示全屏添加说明
     showModal: function () {
       this.setData({
@@ -52,14 +53,15 @@ Component({
         SHOW_MODAL: true
       });
     },
-
     okHandler: function () {
+      const storage_key  = this.data.SHOW_TOP_key;
+      let key = STORAGE_KEY_ONE;
       this.setData({
-        SHOW_MODAL: false
+        SHOW_TOP: false
       });
       wx.setStorage({
-        key: STORAGE_KEY,
-        data: +new Date,
+        key,
+        data: + new Date,
       });
     }
   }
