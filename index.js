@@ -9,6 +9,10 @@ Component({
     text: {
       type: String,
       value: '「添加小程序」访问更便捷!'
+    },
+    duration: {
+      type: Number,
+      value: 0
     }
   },
 
@@ -45,6 +49,12 @@ Component({
       this.setData({
         SHOW_TOP: true
       });
+      // 如果设置延迟关闭则定时
+      if (this.properties.duration) {
+        setTimeout(() => {
+          this.okHandler();
+        }, this.properties.duration * 1000)
+      }
     },
     // 显示全屏添加说明
     showModal: function () {
